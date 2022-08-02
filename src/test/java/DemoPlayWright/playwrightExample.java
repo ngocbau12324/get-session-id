@@ -4,8 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.microsoft.playwright.*;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Scanner;
 
 
 public class playwrightExample {
@@ -28,21 +31,37 @@ public class playwrightExample {
 
                 String user_name_value = "bee.n@itcgroup.io";
                 String password_value = "Baunguyenpr7!@";
-                page.fill(user_name_selector,user_name_value);
+                page.fill(user_name_selector, user_name_value);
                 page.fill(password_selector, password_value);
                 page.click(btnLogin_selector);
             });
-            String response_data = res.text();
+            //Get response and convert it to jsonObject
             Gson gson = new Gson();
-            JsonObject jsonObject = gson.fromJson(response_data,JsonObject.class);
-            String token = jsonObject.get("token").toString();
-            System.out.println("Token = "+token);
+            JsonObject response_data = gson.fromJson(res.text(), JsonObject.class);
+            //Get token and expired date
+            String token = response_data.get("token").toString();
+            LocalDateTime dateTime = LocalDateTime.now();
+            String created_date = dateTime.toString();
+            String expired_date = dateTime.plusDays(1).toString();
 
             //Write to file
-            FileWriter myWriter = new FileWriter("D:\\examplePlaywright\\src\\test\\java\\DataSession\\sessionId.txt");
-            myWriter.write(token);
+            File myFile = new File("D:\\examplePlaywright\\src\\test\\java\\DataSession\\sessionId.txt");
+            FileWriter myWriter = new FileWriter(myFile);
+            myWriter.write("{ " +
+                    "\"session_id\":" + token +
+                    ",\"created_date\":" + "\"" + created_date + "\"" +
+                    ",\"exprired_date\":" + "\"" + expired_date + "\"" +
+                    "}");
             myWriter.close();
 
+            //Read to file
+            String data_session_id = "";
+            Scanner myReader = new Scanner(myFile);
+            while (myReader.hasNextLine()) {
+                data_session_id = data_session_id + myReader.nextLine();
+            }
+            myReader.close();
+            System.out.println(data_session_id);
         }
     }
 }
