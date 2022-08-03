@@ -2,17 +2,20 @@ package DemoPlayWright;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.microsoft.playwright.*;
 
-import java.io.File;
+
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Scanner;
+import Class.SessionClass;
 
 
 public class playwrightExample {
-    public static void main(String[] args) throws InterruptedException, IOException {
+    public static void main(String[] args) throws JsonSyntaxException, IOException {
         try (Playwright playwright = Playwright.create()) {
             Browser browser = playwright
                     .chromium()
@@ -36,32 +39,31 @@ public class playwrightExample {
                 page.click(btnLogin_selector);
             });
             //Get response and convert it to jsonObject
+
             Gson gson = new Gson();
             JsonObject response_data = gson.fromJson(res.text(), JsonObject.class);
             //Get token and expired date
-            String token = response_data.get("token").toString();
+            String token = response_data.get("token").getAsString();
             LocalDateTime dateTime = LocalDateTime.now();
             String created_date = dateTime.toString();
             String expired_date = dateTime.plusDays(1).toString();
 
+            //Create json_session_object
+            SessionClass session = new SessionClass(token,created_date,expired_date);
+            String session_json_object = new Gson().toJson(session);
+
+
             //Write to file
-            File myFile = new File("D:\\examplePlaywright\\src\\test\\java\\DataSession\\sessionId.txt");
-            FileWriter myWriter = new FileWriter(myFile);
-            myWriter.write("{ " +
-                    "\"session_id\":" + token +
-                    ",\"created_date\":" + "\"" + created_date + "\"" +
-                    ",\"exprired_date\":" + "\"" + expired_date + "\"" +
-                    "}");
+            String path = "./src/test/java/DataSession/session.json";
+            FileWriter myWriter = new FileWriter(path);
+            myWriter.write(session_json_object);
             myWriter.close();
 
             //Read to file
-            String data_session_id = "";
-            Scanner myReader = new Scanner(myFile);
-            while (myReader.hasNextLine()) {
-                data_session_id = data_session_id + myReader.nextLine();
-            }
-            myReader.close();
-            System.out.println(data_session_id);
+            FileReader reader = new FileReader(path);
+            Object jsonObject = JsonParser.parseReader(reader);
+            SessionClass sessionClass = new SessionClass(new Gson().fromJson(jsonObject.toString(), SessionClass.class));
+            System.out.println(sessionClass);
         }
     }
 }
