@@ -87,13 +87,12 @@ public class GetSession {
             // Waits for the next response matching some conditions
             Response res = page.waitForResponse(response -> api_url.equals(response.url()) && response.status() == 200, () -> {
                 // Triggers the response
-                String user_name_selector = "#login-form > div > div > form > input:nth-child(1)";
-                String password_selector = "#login-form > div > div > form > input:nth-child(2)";
-                String btnLogin_selector = "#login-form > div > div > form > div > button";
-
-                String user_name_value = this.user_name;
-                String password_value = this.password;
-                page.fill(user_name_selector, user_name_value);
+                String email_address_selector = "#app > div > div > div > div.MdBox01 > div > form > fieldset > div:nth-child(2) > input[type=text]";
+                String password_selector = "#app > div > div > div > div.MdBox01 > div > form > fieldset > div:nth-child(3) > input[type=password]";
+                String btnLogin_selector = "#app > div > div > div > div.MdBox01 > div > form > fieldset > div.mdFormGroup01Btn > button";
+                String email_address_value = "lw81112@v.linecorp.com";
+                String password_value = "lw81112";
+                page.fill(email_address_selector, email_address_value);
                 page.fill(password_selector, password_value);
                 page.click(btnLogin_selector);
             });
@@ -101,13 +100,13 @@ public class GetSession {
             Gson gson = new Gson();
             JsonObject response_data = gson.fromJson(res.text(), JsonObject.class);
             //Get token and expired date
-            String token = response_data.get("token").getAsString();
+            String ss = response_data.get("session_id").getAsString();
             LocalDateTime dateTime = LocalDateTime.now();
             String created_date = dateTime.toString();
             String expired_date = dateTime.plusDays(1).toString();
 
             //Create json_session_object
-            SessionClass session = new SessionClass(token,created_date,expired_date);
+            SessionClass session = new SessionClass(ss,created_date,expired_date);
             String session_json_object = new Gson().toJson(session);
 
             //Write to file
