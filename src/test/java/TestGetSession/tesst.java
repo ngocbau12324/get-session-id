@@ -34,13 +34,15 @@ public class tesst {
                 LocalDateTime expired_date = LocalDateTime.parse(session.getExpired_date());
                 LocalDateTime dateTimeNow = LocalDateTime.now();
                 if(dateTimeNow.isBefore(expired_date)){
-                    hashSession.put("Session",session);
-                    System.out.println("session_id:"+session.getSession_id());
+                    hashSession.put("session",session);
+                    System.out.println("file exits and session not expired:"+session.getSession_id());
                     System.out.println(hashSession);
                 }else{
+                    System.out.println("file exits and session expired");
                     getNewSession();
                 }
             }else{
+                System.out.println("File not exist");
                 getNewSession();
             }
         }else {
